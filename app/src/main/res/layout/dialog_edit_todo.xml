@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/rectangle"
+    android:backgroundTint="@color/white"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:textColor="#3E3E3E"
+                android:layout_toLeftOf="@+id/np_priority"
+                android:id="@+id/et_todo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:hint="Enter here..."
+                android:padding="10dp" />
+
+            <NumberPicker
+                android:textColor="#3E3E3E"
+                android:id="@+id/np_priority"
+                android:layout_alignParentEnd="true"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"/>
+
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rectangle"
+            android:text="Save" />
+
+    </LinearLayout>
+
+
+</LinearLayout>
