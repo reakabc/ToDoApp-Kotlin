@@ -34,4 +34,4 @@ ReaK AbC
 
 ## Screenshots
 
-![LinkedIn](https://homepages.cae.wisc.edu/~ece533/images/arctichare.png "Connect to me on linkedIn...")
+![](https://github.com/reakabc/ToDoApp-Kotlin/blob/master/screenshots/Screenshot_20210213_122503.jpg "Connect to me on linkedIn...")
