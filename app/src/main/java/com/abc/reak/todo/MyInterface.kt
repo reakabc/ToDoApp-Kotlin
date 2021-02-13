@@ -6,4 +6,6 @@ interface MyInterface {
 
     public fun selectDate(date:String);
 
+    public fun editTodo(todo:Todo);
+
 }

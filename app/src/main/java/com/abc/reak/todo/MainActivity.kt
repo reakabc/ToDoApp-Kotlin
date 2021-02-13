@@ -1,6 +1,7 @@
 package com.abc.reak.todo
 
 import android.app.Dialog
+import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -9,9 +10,12 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -26,6 +30,16 @@ class MainActivity : AppCompatActivity(), MyInterface {
     private lateinit var recyclerView:RecyclerView
     private lateinit var fab:FloatingActionButton
     private lateinit var progressBar: ProgressBar
+    private lateinit var coordinatorLayout:CoordinatorLayout
+
+    private lateinit var dialog:Dialog
+    private lateinit var priorityView:TextView
+
+    private var priority:Int = 0
+
+    private var currentSelectedDate:String = "0";
+
+    private lateinit var adapter:TodoAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,6 +47,7 @@ class MainActivity : AppCompatActivity(), MyInterface {
 
         init()
         loadTodo(getCurrentDate())
+        currentSelectedDate = getCurrentDate();
 
     }
 
@@ -47,26 +62,110 @@ class MainActivity : AppCompatActivity(), MyInterface {
         recyclerView = findViewById(R.id.rv_todo)
         fab = findViewById(R.id.fab)
         progressBar = findViewById(R.id.pb_progress)
+        coordinatorLayout = findViewById(R.id.coordinator)
 
         fab.setOnClickListener(View.OnClickListener { showAddDialog() })
         insightBtn.setOnClickListener(View.OnClickListener { showInsightDialog() })
 
         val db = DatabaseHelper(this)
-        val reports = db.progressReportTodo(getCurrentDate());
+        val reports = db.progressReportTodo(currentSelectedDate);
         progressBar.max = reports[1]
         progressBar.progress = reports[0]
 
+    }
+
+    fun loadTodo(currentDate: String = getCurrentDate()){
+
+        init()
+        val db = DatabaseHelper(this)
+        adapter = TodoAdapter(this, db.loadTodo(currentDate), this)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = adapter
+        enableSwipeToDelete()
 
 
     }
 
-    public fun loadTodo(currentDate: String = getCurrentDate()){
+    override fun reloadRecyclerView() {
+        loadTodo()
+    }
 
-        init()
+    override fun selectDate(date: String) {
+        //do nothing
+        currentDate.text = if(date == getCurrentDate()) "Today" else date
+        currentSelectedDate = date
+        loadTodo(date)
+    }
 
-        val db = DatabaseHelper(this)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = TodoAdapter(this, db.loadTodo(currentDate), this)
+    override fun editTodo(todo: Todo) {
+        showEditDialog(todo)
+    }
+
+    private fun enableSwipeToDelete() {
+        val swipeToDeleteCallback: SwipeCallback = object : SwipeCallback(this) {
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, i: Int) {
+                val position = viewHolder.adapterPosition
+                val item: Todo = adapter.getData().get(position)
+                adapter.markAsDone(position)
+            }
+        }
+        val itemTouchhelper = ItemTouchHelper(swipeToDeleteCallback)
+        itemTouchhelper.attachToRecyclerView(recyclerView)
+    }
+
+    fun setPriority(view: View){
+        val view:TextView = view as TextView
+        priority = view.text.toString().toInt()
+        priorityView.text = priority.toString()
+        dialog.dismiss()
+    }
+
+    private fun showEditDialog(todoItem: Todo){
+
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_edit_todo)
+        dialog.setCancelable(true)
+
+        val todoInput:EditText = dialog.findViewById(R.id.et_todo)
+        priorityView = dialog.findViewById(R.id.tv_priority)
+        val modify:Button = dialog.findViewById(R.id.add)
+        val delete:Button = dialog.findViewById(R.id.cancel)
+
+        todoInput.setText(todoItem.todo)
+        priorityView.text = todoItem.priority.toString()
+
+        priorityView.text = todoItem.priority.toString()
+        modify.setOnClickListener(View.OnClickListener {
+
+            val db = DatabaseHelper(this)
+
+            val status = db.editTodo(Todo(id = todoItem.id, todo = todoInput.text.toString(), time = todoItem.time, isCompleted = 0, priority = priorityView.text.toString().toInt()))
+            reloadRecyclerView()
+            dialog.dismiss()
+
+        })
+
+        delete.setOnClickListener(View.OnClickListener {
+            val db = DatabaseHelper(this)
+            db.deleteTodo(todoItem.id)
+            reloadRecyclerView()
+            dialog.dismiss()
+        })
+
+        priorityView.setOnClickListener(View.OnClickListener {
+            showPriorityDialog()
+        })
+
+        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.window!!.setGravity(Gravity.BOTTOM)
+        dialog.window!!.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+
+        val lp = WindowManager.LayoutParams()
+        lp.copyFrom(dialog.window!!.attributes)
+        lp.width = WindowManager.LayoutParams.MATCH_PARENT
+
+        dialog.window!!.attributes = lp
+        dialog.show()
 
     }
 
@@ -95,22 +194,40 @@ class MainActivity : AppCompatActivity(), MyInterface {
         dialog.setCancelable(true)
 
         val todoInput:EditText = dialog.findViewById(R.id.et_todo)
-        val priority:NumberPicker = dialog.findViewById(R.id.np_priority)
-        val update:Button = dialog.findViewById(R.id.button)
+        priorityView = dialog.findViewById(R.id.tv_priority)
+        val add:Button = dialog.findViewById(R.id.add)
+        val cancel:Button = dialog.findViewById(R.id.cancel)
 
-        priority.maxValue = 9
-        priority.minValue = 1
-
-        update.setOnClickListener(View.OnClickListener {
+        add.setOnClickListener(View.OnClickListener {
 
             val db = DatabaseHelper(this)
-
-            val status = db.addTodo(Todo(todo = todoInput.text.toString(), time = getCurrentDate(), isCompleted = 0, priority = priority.value))
-            Toast.makeText(this, status.toString(), Toast.LENGTH_SHORT).show()
-
+            db.addTodo(Todo(todo = todoInput.text.toString(), time = getCurrentDate(), isCompleted = 0, priority = priority))
             loadTodo(getCurrentDate())
 
         })
+
+        priorityView.setOnClickListener(View.OnClickListener { showPriorityDialog() })
+
+        cancel.setOnClickListener(View.OnClickListener { dialog.dismiss() })
+
+        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.window!!.setGravity(Gravity.BOTTOM)
+        dialog.window!!.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+
+        val lp = WindowManager.LayoutParams()
+        lp.copyFrom(dialog.window!!.attributes)
+        lp.width = WindowManager.LayoutParams.MATCH_PARENT
+
+        dialog.window!!.attributes = lp
+        dialog.show()
+
+    }
+
+    private fun showPriorityDialog(){
+
+        dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_priority_picker)
+        dialog.setCancelable(true)
 
         dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.window!!.setGravity(Gravity.BOTTOM)
@@ -137,7 +254,7 @@ class MainActivity : AppCompatActivity(), MyInterface {
         val overall:TextView = dialog.findViewById(R.id.tv_overall_report)
 
         val db = DatabaseHelper(this)
-        val reports = db.progressReportTodo(getCurrentDate());
+        val reports = db.progressReportTodo(currentSelectedDate);
 
         reportTodays.max = reports[1]
         reportTodays.progress = reports[0]
@@ -178,26 +295,16 @@ class MainActivity : AppCompatActivity(), MyInterface {
         recyclerView.adapter = CustomDatePickerAdapter(this, dates, this)
 
         dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        dialog.window!!.setGravity(Gravity.CENTER)
+        dialog.window!!.setGravity(Gravity.TOP)
         dialog.window!!.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
 
         val lp = WindowManager.LayoutParams()
         lp.copyFrom(dialog.window!!.attributes)
-        lp.width = WindowManager.LayoutParams.MATCH_PARENT
+        lp.width = WindowManager.LayoutParams.WRAP_CONTENT
 
         dialog.window!!.attributes = lp
         dialog.show()
 
-    }
-
-    override fun reloadRecyclerView() {
-        loadTodo()
-    }
-
-    override fun selectDate(date:String) {
-        //do nothing
-        currentDate.text = if(date == getCurrentDate()) "Today" else date;
-        loadTodo(date)
     }
 
 }

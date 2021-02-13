@@ -1,48 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/rectangle"
-    android:backgroundTint="@color/white"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardCornerRadius="10dp"
+    android:layout_margin="20dp"
     android:orientation="vertical">
 
     <LinearLayout
+        android:layout_margin="20dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <EditText
-                android:textColor="#3E3E3E"
-                android:layout_toLeftOf="@+id/np_priority"
-                android:id="@+id/et_todo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@android:color/transparent"
-                android:hint="Enter here..."
-                android:padding="10dp" />
-
-            <NumberPicker
-                android:textColor="#3E3E3E"
-                android:id="@+id/np_priority"
-                android:layout_alignParentEnd="true"
-                android:layout_width="40dp"
-                android:layout_height="wrap_content"/>
-
-        </RelativeLayout>
-
-        <Button
-            android:id="@+id/button"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/rectangle"
-            android:text="Save" />
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Modify"
+                android:textSize="18sp"
+                android:textStyle="normal"
+                android:textColor="@color/black"/>
+
+            <TextView
+                android:id="@+id/tv_priority"
+                android:background="@drawable/circle"
+                android:backgroundTint="@color/black"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:text="9"
+                android:textColor="@color/white"
+                android:gravity="center"
+                android:textSize="20dp"
+                android:textStyle="bold"/>
+
+        </LinearLayout>
+
+        <EditText
+            android:layout_marginTop="10dp"
+            android:textColor="#3E3E3E"
+            android:id="@+id/et_todo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/round_rectangle"
+            android:backgroundTint="#72F2F2F2"
+            android:hint="Enter here..."
+            android:textColorHint="#616161"
+            android:padding="10dp" />
+
+        <LinearLayout
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:layout_weight="1"
+                android:id="@+id/cancel"
+                android:background="@android:color/transparent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:text="Delete" />
+
+            <Button
+                android:layout_weight="1"
+                android:id="@+id/add"
+                android:background="@android:color/transparent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/design_default_color_primary"
+                android:text="Save" />
+
+        </LinearLayout>
+
 
     </LinearLayout>
 
 
-</LinearLayout>
+</androidx.cardview.widget.CardView>

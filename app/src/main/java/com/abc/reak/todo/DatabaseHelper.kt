@@ -76,8 +76,15 @@ class DatabaseHelper(context: Context): SQLiteOpenHelper(context, DATABASE_NAME,
         return cursor.moveToFirst()
     }
 
-    fun loadTodo(time:String): List<Todo>{
-        val list = mutableListOf<Todo>();
+    fun deleteTodo(id:Int):Boolean{
+        val db = writableDatabase
+        val deleteQuery = "DELETE FROM $TODO_TABLE WHERE $TODO_ID = '$id'"
+        val cursor = db.rawQuery(deleteQuery, null)
+        return cursor.moveToFirst()
+    }
+
+    fun loadTodo(time:String): ArrayList<Todo>{
+        val list = ArrayList<Todo>();
 
         val db = readableDatabase
         val selectQuery = "SELECT * FROM $TODO_TABLE WHERE $TIME = '$time' ORDER BY $IS_COMPLETED ASC, $PRIORITY DESC"

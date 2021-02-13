@@ -1,97 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/white"
-    android:padding="20dp"
+    android:layout_margin="20dp"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    app:cardCornerRadius="10dp">
 
     <LinearLayout
         android:layout_width="match_parent"
+        android:layout_margin="20dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
-        <TextView
-            android:layout_weight="1"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Today's Report"
-            android:textColor="#3E3E3E"/>
+            android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/tv_today_report"
-            android:layout_weight="1"
-            android:gravity="right"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="9/10"
-            android:textColor="#3E3E3E"/>
+            <TextView
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Today's Report" />
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/tv_today_report"
+                android:layout_weight="1"
+                android:gravity="right"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="9/10" />
 
-    <LinearLayout
-        android:layout_marginVertical="5dp"
-        android:padding="0dp"
-        android:layout_width="match_parent"
-        android:layout_height="4dp">
+        </LinearLayout>
 
-        <ProgressBar
-            android:layout_margin="0dp"
+        <LinearLayout
+            android:layout_marginVertical="5dp"
             android:padding="0dp"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-            android:indeterminate="false"
-            android:progress="10"
-            android:max="100"
-            android:maxHeight="0dp"
-            android:id="@+id/pb_today"/>
+            android:layout_height="4dp">
 
-    </LinearLayout>
+            <ProgressBar
+                android:layout_margin="0dp"
+                android:padding="0dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                android:indeterminate="false"
+                android:progress="10"
+                android:max="100"
+                android:maxHeight="0dp"
+                android:id="@+id/pb_today"/>
 
-    <LinearLayout
-        android:layout_marginTop="20dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        </LinearLayout>
 
-        <TextView
-            android:layout_weight="1"
+        <LinearLayout
+            android:layout_marginTop="20dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Overall Report"
-            android:textColor="#3E3E3E"/>
+            android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/tv_overall_report"
-            android:layout_weight="1"
-            android:gravity="right"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="9/10"
-            android:textColor="#3E3E3E"/>
+            <TextView
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Overall Report" />
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/tv_overall_report"
+                android:layout_weight="1"
+                android:gravity="right"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="9/10" />
 
-    <LinearLayout
-        android:layout_marginVertical="5dp"
-        android:padding="0dp"
-        android:layout_width="match_parent"
-        android:layout_height="4dp">
+        </LinearLayout>
 
-        <ProgressBar
-            android:layout_margin="0dp"
+        <LinearLayout
+            android:layout_marginVertical="5dp"
             android:padding="0dp"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-            android:indeterminate="false"
-            android:progress="10"
-            android:max="100"
-            android:maxHeight="0dp"
-            android:id="@+id/pb_overall"/>
+            android:layout_height="4dp">
+
+            <ProgressBar
+                android:layout_margin="0dp"
+                android:padding="0dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                android:indeterminate="false"
+                android:progress="10"
+                android:max="100"
+                android:maxHeight="0dp"
+                android:id="@+id/pb_overall"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 
-</LinearLayout>
+</androidx.cardview.widget.CardView>
