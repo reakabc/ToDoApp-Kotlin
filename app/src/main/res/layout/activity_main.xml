@@ -103,6 +103,14 @@
         <androidx.recyclerview.widget.RecyclerView
             android:layout_below="@+id/progress_layout"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/rv_project"
+            android:layout_marginTop="5dp"
+            android:layout_marginHorizontal="5dp"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_below="@+id/rv_project"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/rv_todo"
             android:layout_margin="5dp"/>
@@ -115,6 +123,17 @@
             android:layout_alignParentBottom="true"
             android:src="@drawable/ic_add"
             android:layout_margin="20dp"
+            android:contentDescription="Add Button" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/fab_project"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:src="@drawable/ic_add_task"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginBottom="100dp"
             android:contentDescription="Add Button" />
 
 

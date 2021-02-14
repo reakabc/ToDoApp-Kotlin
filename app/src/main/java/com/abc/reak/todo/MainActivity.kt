@@ -1,7 +1,6 @@
 package com.abc.reak.todo
 
 import android.app.Dialog
-import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -15,7 +14,6 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.snackbar.Snackbar
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -23,23 +21,26 @@ import java.util.*
 
 class MainActivity : AppCompatActivity(), MyInterface {
 
-    private lateinit var currentDate:TextView
-    private lateinit var beforeBtn:ImageButton
-    private lateinit var insightBtn:ImageButton
-    private lateinit var nextBtn:ImageButton
-    private lateinit var recyclerView:RecyclerView
-    private lateinit var fab:FloatingActionButton
+    private lateinit var currentDate: TextView
+    private lateinit var beforeBtn: ImageButton
+    private lateinit var insightBtn: ImageButton
+    private lateinit var nextBtn: ImageButton
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var fab: FloatingActionButton
+    private lateinit var fabProject: FloatingActionButton
     private lateinit var progressBar: ProgressBar
-    private lateinit var coordinatorLayout:CoordinatorLayout
+    private lateinit var coordinatorLayout: CoordinatorLayout
+    private lateinit var projectRecyclerView: RecyclerView
 
-    private lateinit var dialog:Dialog
-    private lateinit var priorityView:TextView
+    private lateinit var dialog: Dialog
+    private lateinit var priorityView: TextView
 
-    private var priority:Int = 0
+    private var priority: Int = 9
 
-    private var currentSelectedDate:String = "0";
+    private var currentSelectedDate: String = "0";
 
-    private lateinit var adapter:TodoAdapter
+    private lateinit var adapter: TodoAdapter
+    private lateinit var adapterProject: ProjectAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,11 +48,13 @@ class MainActivity : AppCompatActivity(), MyInterface {
 
         init()
         loadTodo(getCurrentDate())
-        currentSelectedDate = getCurrentDate();
+        currentSelectedDate = getCurrentDate()
+
+        loadProjects()
 
     }
 
-    private fun init(){
+    private fun init() {
 
         currentDate = findViewById(R.id.tv_current_date)
         currentDate.setOnClickListener(View.OnClickListener { showDatePickerDialog() })
@@ -63,9 +66,13 @@ class MainActivity : AppCompatActivity(), MyInterface {
         fab = findViewById(R.id.fab)
         progressBar = findViewById(R.id.pb_progress)
         coordinatorLayout = findViewById(R.id.coordinator)
+        projectRecyclerView = findViewById(R.id.rv_project)
 
-        fab.setOnClickListener(View.OnClickListener { showAddDialog() })
-        insightBtn.setOnClickListener(View.OnClickListener { showInsightDialog() })
+        fabProject = findViewById(R.id.fab_project)
+        fabProject.setOnClickListener { showAddProjectDialog() }
+
+        fab.setOnClickListener { showAddDialog() }
+        insightBtn.setOnClickListener { showInsightDialog() }
 
         val db = DatabaseHelper(this)
         val reports = db.progressReportTodo(currentSelectedDate);
@@ -74,11 +81,20 @@ class MainActivity : AppCompatActivity(), MyInterface {
 
     }
 
-    fun loadTodo(currentDate: String = getCurrentDate()){
+    private fun loadProjects() {
+        init()
+        val db = DatabaseHelper(this)
+        adapterProject = ProjectAdapter(this, db.loadProject(), this)
+        projectRecyclerView.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        projectRecyclerView.adapter = adapterProject
+    }
+
+    private fun loadTodo(currentDate: String = getCurrentDate()) {
 
         init()
         val db = DatabaseHelper(this)
-        adapter = TodoAdapter(this, db.loadTodo(currentDate), this)
+        adapter = TodoAdapter(this, db.loadTodo(currentDate, 0), this)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
         enableSwipeToDelete()
@@ -92,7 +108,7 @@ class MainActivity : AppCompatActivity(), MyInterface {
 
     override fun selectDate(date: String) {
         //do nothing
-        currentDate.text = if(date == getCurrentDate()) "Today" else date
+        currentDate.text = if (date == getCurrentDate()) "Today" else date
         currentSelectedDate = date
         loadTodo(date)
     }
@@ -113,23 +129,23 @@ class MainActivity : AppCompatActivity(), MyInterface {
         itemTouchhelper.attachToRecyclerView(recyclerView)
     }
 
-    fun setPriority(view: View){
-        val view:TextView = view as TextView
+    fun setPriority(view: View) {
+        val view: TextView = view as TextView
         priority = view.text.toString().toInt()
         priorityView.text = priority.toString()
         dialog.dismiss()
     }
 
-    private fun showEditDialog(todoItem: Todo){
+    private fun showEditDialog(todoItem: Todo) {
 
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_edit_todo)
         dialog.setCancelable(true)
 
-        val todoInput:EditText = dialog.findViewById(R.id.et_todo)
+        val todoInput: EditText = dialog.findViewById(R.id.et_todo)
         priorityView = dialog.findViewById(R.id.tv_priority)
-        val modify:Button = dialog.findViewById(R.id.add)
-        val delete:Button = dialog.findViewById(R.id.cancel)
+        val modify: Button = dialog.findViewById(R.id.add)
+        val delete: Button = dialog.findViewById(R.id.cancel)
 
         todoInput.setText(todoItem.todo)
         priorityView.text = todoItem.priority.toString()
@@ -139,7 +155,16 @@ class MainActivity : AppCompatActivity(), MyInterface {
 
             val db = DatabaseHelper(this)
 
-            val status = db.editTodo(Todo(id = todoItem.id, todo = todoInput.text.toString(), time = todoItem.time, isCompleted = 0, priority = priorityView.text.toString().toInt()))
+            val status = db.editTodo(
+                Todo(
+                    id = todoItem.id,
+                    todo = todoInput.text.toString(),
+                    time = todoItem.time,
+                    isCompleted = 0,
+                    priority = priorityView.text.toString().toInt(),
+                    project = 0
+                )
+            )
             reloadRecyclerView()
             dialog.dismiss()
 
@@ -169,7 +194,7 @@ class MainActivity : AppCompatActivity(), MyInterface {
 
     }
 
-    private fun getCurrentDate():String{
+    private fun getCurrentDate(): String {
 
         val pattern = "dd-MM-yyyy"
         return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -187,22 +212,59 @@ class MainActivity : AppCompatActivity(), MyInterface {
 
     }
 
-    private fun showAddDialog(){
+    private fun getCurrentDateWithTime(): String {
+
+        val pattern = "dd-MM-yyyy HH:mm a"
+        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+
+            val date = LocalDateTime.now()
+            val dtf = DateTimeFormatter.ofPattern(pattern)
+            date.format(dtf)
+
+        } else {
+
+            val sdf = SimpleDateFormat(pattern, Locale.ENGLISH)
+            sdf.format(Date())
+
+        }
+
+    }
+
+    private fun showAddProjectDialog() {
 
         val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_add_todo)
+        dialog.setContentView(R.layout.dialog_add_project)
         dialog.setCancelable(true)
 
-        val todoInput:EditText = dialog.findViewById(R.id.et_todo)
+        val titlePro: EditText = dialog.findViewById(R.id.et_title)
+        val descPro: EditText = dialog.findViewById(R.id.et_desc)
+        val startPro: EditText = dialog.findViewById(R.id.et_starting)
+        val deadPro: EditText = dialog.findViewById(R.id.et_deadline)
+
         priorityView = dialog.findViewById(R.id.tv_priority)
-        val add:Button = dialog.findViewById(R.id.add)
-        val cancel:Button = dialog.findViewById(R.id.cancel)
+        val add: Button = dialog.findViewById(R.id.add)
+        val cancel: Button = dialog.findViewById(R.id.cancel)
+
+        startPro.setText(getCurrentDateWithTime())
+        deadPro.setText(getCurrentDateWithTime())
 
         add.setOnClickListener(View.OnClickListener {
 
             val db = DatabaseHelper(this)
-            db.addTodo(Todo(todo = todoInput.text.toString(), time = getCurrentDate(), isCompleted = 0, priority = priority))
-            loadTodo(getCurrentDate())
+            db.addProject(
+                Project(
+                    id = 0,
+                    name = titlePro.text.toString(),
+                    isCompleted = 0,
+                    priority = priority,
+                    starting = startPro.text.toString(),
+                    deadline = deadPro.text.toString(),
+                    desc = descPro.text.toString()
+                )
+            )
+            loadProjects()
+            dialog.dismiss()
+
 
         })
 
@@ -223,7 +285,57 @@ class MainActivity : AppCompatActivity(), MyInterface {
 
     }
 
-    private fun showPriorityDialog(){
+    private fun showAddDialog() {
+
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_add_todo)
+        dialog.setCancelable(true)
+
+        val todoInput: EditText = dialog.findViewById(R.id.et_todo)
+        priorityView = dialog.findViewById(R.id.tv_priority)
+        val add: Button = dialog.findViewById(R.id.add)
+        val cancel: Button = dialog.findViewById(R.id.cancel)
+
+        add.setOnClickListener(View.OnClickListener {
+
+            val db = DatabaseHelper(this)
+            db.addTodo(
+                Todo(
+                    todo = todoInput.text.toString(),
+                    time = getCurrentDate(),
+                    isCompleted = 0,
+                    priority = priority,
+                    project = 0
+                )
+            )
+            loadTodo(getCurrentDate())
+            dialog.dismiss()
+
+        })
+
+        priorityView.setOnClickListener(View.OnClickListener { showPriorityDialog() })
+
+        cancel.setOnClickListener(View.OnClickListener { dialog.dismiss() })
+
+        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.window!!.setGravity(Gravity.BOTTOM)
+        dialog.window!!.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+
+        val lp = WindowManager.LayoutParams()
+        lp.copyFrom(dialog.window!!.attributes)
+        lp.width = WindowManager.LayoutParams.MATCH_PARENT
+
+        dialog.window!!.attributes = lp
+        dialog.show()
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadProjects()
+    }
+
+    private fun showPriorityDialog() {
 
         dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_priority_picker)
@@ -242,16 +354,16 @@ class MainActivity : AppCompatActivity(), MyInterface {
 
     }
 
-    private fun showInsightDialog(){
+    private fun showInsightDialog() {
 
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_insights)
         dialog.setCancelable(true)
 
-        val reportTodays:ProgressBar = dialog.findViewById(R.id.pb_today)
-        val reportOverall:ProgressBar = dialog.findViewById(R.id.pb_overall)
-        val today:TextView = dialog.findViewById(R.id.tv_today_report)
-        val overall:TextView = dialog.findViewById(R.id.tv_overall_report)
+        val reportTodays: ProgressBar = dialog.findViewById(R.id.pb_today)
+        val reportOverall: ProgressBar = dialog.findViewById(R.id.pb_overall)
+        val today: TextView = dialog.findViewById(R.id.tv_today_report)
+        val overall: TextView = dialog.findViewById(R.id.tv_overall_report)
 
         val db = DatabaseHelper(this)
         val reports = db.progressReportTodo(currentSelectedDate);
@@ -280,13 +392,13 @@ class MainActivity : AppCompatActivity(), MyInterface {
 
     }
 
-    private fun showDatePickerDialog(){
+    private fun showDatePickerDialog() {
 
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_date_picker)
         dialog.setCancelable(true)
 
-        val recyclerView:RecyclerView = dialog.findViewById(R.id.rv_dates)
+        val recyclerView: RecyclerView = dialog.findViewById(R.id.rv_dates)
 
         val db = DatabaseHelper(this)
         val dates = db.loadDates();
