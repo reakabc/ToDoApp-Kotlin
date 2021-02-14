@@ -32,6 +32,6 @@ A lot of exciting projects and learning going on. I am more an entrepreneur and 
 
 ReaK AbC
 
-## Screenshots
+## Screenshot
 
-![](https://github.com/reakabc/ToDoApp-Kotlin/blob/master/screenshots/Screenshot_20210213_122503.jpg "Connect to me on linkedIn...")
+![](https://github.com/reakabc/ToDoApp-Kotlin/blob/master/screenshots/Screenshot_20210214_143453.jpg "Screenshot")
